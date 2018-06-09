@@ -12,6 +12,7 @@ String fileName;
 boolean firstContact = false;
 
 String lastfield = "m9";
+java.sql.Timestamp last_ts;
 
 String user     = "php";
 String pass     = "php2000";
@@ -67,7 +68,15 @@ if (inString != null) {
     dbconnection = new MySQL( this, "localhost", database, user, pass );
 
     if ( dbconnection.connect() ) {
-      dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" );  
+      dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" ); 
+      dbconnection.query( "SELECT * FROM leds WHERE curtime > '"+last_ts+"' ORDER BY curtime ASC" );
+      while( dbconnection.next() )
+      {
+        myPort.write(dbconnection.getString( "fields" ));
+        println("leds =  "dbconnection.getString( "fields" ) );
+        
+        last_ts = dbconnection.getTimestamp( "curtime" );
+      }
       dbconnection.close();
     }
     }
