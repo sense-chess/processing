@@ -1,4 +1,7 @@
-// Example by Tom Igoe
+/*
+ *  This sketch sends test data to the sense-chess test database.
+ *  sense-chess is a project by Marcus Schoch and Jan Schneider.
+ */
 
 import processing.serial.*;
 import java.util.*;
