@@ -11,7 +11,6 @@ import de.bezier.data.sql.*;
 String fileName;
 boolean firstContact = false;
 
-String lastfield = "m9";
 java.sql.Timestamp last_ts;
 
 String user     = "php";
@@ -73,7 +72,7 @@ if (inString != null) {
       while( dbconnection.next() )
       {
         myPort.write(dbconnection.getString( "fields" ));
-        println("leds =  "dbconnection.getString( "fields" ) );
+        println("leds =  "+dbconnection.getString( "fields" )+" ");
         
         last_ts = dbconnection.getTimestamp( "curtime" );
       }
