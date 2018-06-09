@@ -14,7 +14,7 @@
 <h4 align="center">Usage</h4>
 <p  align="center">1. Set up an local server (visit <a href="https://github.com/sense-chess/server">sense-chess server</a>).</p>  
 <p  align="center">2. Install <a href="https://processing.org/download/">Processing</a>.</p>
-<p  align="center">3. Install the MySQL library in Processing in the library menu (<a href="https://github.com/fjenett/sql-library-processing">BezierSQLib</a>.</p>  
+<p  align="center">3. Install the MySQL library in Processing in the library menu (<a href="https://github.com/fjenett/sql-library-processing">BezierSQLib</a>).</p>  
 <p  align="center">4. Run the <a href="https://github.com/sense-chess/arduino">Arduino Sketch</a> connected to your machine.</p>
 <p  align="center">5. Run the Processing sketch and check for the correct port:<br>
 <code  align="center">myPort = new Serial(this, Serial.list()[0], 9600);<br></code><br>
