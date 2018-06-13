@@ -1,6 +1,8 @@
 /*
  *  This sketch sends test data to the sense-chess test database.
  *  sense-chess is a project by Marcus Schoch and Jan Schneider.
+ *  
+ *  https://sense-chess.de
  */
 
 import processing.serial.*;
@@ -10,6 +12,14 @@ import de.bezier.data.sql.*;
 
 String fileName;
 boolean firstContact = false;
+String correctfields[] = { "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
+                    "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8",
+                    "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8",
+                    "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8",
+                    "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8",
+                    "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
+                    "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8",
+                    "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8" };
 
 java.sql.Timestamp last_ts;
 
@@ -67,7 +77,11 @@ if (inString != null) {
     dbconnection = new MySQL( this, "localhost", database, user, pass );
 
     if ( dbconnection.connect() ) {
-      dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" ); 
+      for (int i = 0; i < correctfields.length; i++) {
+        if(correctfields[i]==list[0]){
+          dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" ); 
+        }
+      }
       dbconnection.query( "SELECT * FROM leds WHERE curtime > '"+last_ts+"' ORDER BY curtime ASC" );
       while( dbconnection.next() )
       {
