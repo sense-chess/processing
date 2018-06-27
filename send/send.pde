@@ -12,6 +12,7 @@ import de.bezier.data.sql.*;
 
 String fileName;
 boolean firstContact = false;
+long lastTimeFieldRec[] = {};
 String correctfields[] = { "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
                            "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8",
                            "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8",
@@ -19,8 +20,7 @@ String correctfields[] = { "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
                            "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8",
                            "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
                            "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8",
-                           "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8" };
-
+                           "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8" };                        
 String user     = "php";
 String pass     = "php2000";
 String database = "chess";
@@ -37,6 +37,10 @@ void setup() {
 
 // List all the available serial ports
 printArray(Serial.list());
+  for(int o = 0; o <correctfields.length;o++)
+  {
+    lastTimeFieldRec[o] = 0;
+  } 
   myPort = new Serial(this, Serial.list()[0], 9600); //change the 0 to a 1 or 2 etc. to match your port
   myPort.clear();
   myPort.bufferUntil(lf);
