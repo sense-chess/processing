@@ -26,21 +26,39 @@ String inString;  // Input string from serial port
 int lf = 10;      // ASCII linefeed
 PFont font;
 
-void setup() {
+void setup()
+{
   size(600,100);  
-
-// List all the available serial ports
-printArray(Serial.list());
-  myPort = new Serial(this, Serial.list()[1], 9600); //change the 0 to a 1 or 2 etc. to match your port
+  // List all the available serial ports
+  printArray(Serial.list());
+  myPort = new Serial(this, Serial.list()[0], 9600); //change the 0 to a 1 or 2 etc. to match your port
   myPort.clear();
   myPort.bufferUntil(lf);
 }
 
-void draw() {
+void draw()
+{
   background(0);
   //serialEvent(myPort);
   text("received: " + inString, 10,50);
+  loop();
 }
+
+void loop() {
+  // connect to database of server "localhost"  
+  dbconnection = new MySQL( this, "localhost", database, user, pass );
+  if ( dbconnection.connect() )
+  {
+    dbconnection.query( "SELECT * FROM leds WHERE curtime > '"+last_ts+"' ORDER BY curtime ASC" );
+    while( dbconnection.next() )
+    {
+      myPort.write(dbconnection.getString( "fields" ));
+      println("leds =  "+dbconnection.getString( "fields" )+" ");
+      last_ts = dbconnection.getTimestamp( "curtime" );
+    }
+    dbconnection.close();
+  }
+}  
 
 void serialEvent(Serial p) {
   inString = p.readString();        
@@ -57,23 +75,6 @@ void serialEvent(Serial p) {
         firstContact = true;
         myPort.write("connected");
         println("connected to Arduino");
-      }
-    }
-    else { //if we've already established contact, keep getting and parsing data    
-      
-      // connect to database of server "localhost"  
-      dbconnection = new MySQL( this, "localhost", database, user, pass );
-  
-      if ( dbconnection.connect() ) {
-        dbconnection.query( "SELECT * FROM leds WHERE curtime > '"+last_ts+"' ORDER BY curtime ASC" );
-        while( dbconnection.next() )
-        {
-          myPort.write(dbconnection.getString( "fields" ));
-          println("leds =  "+dbconnection.getString( "fields" )+" ");
-          
-          last_ts = dbconnection.getTimestamp( "curtime" );
-        }
-        dbconnection.close();
       }
     }
   }        
