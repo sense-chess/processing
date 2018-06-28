@@ -29,10 +29,11 @@ int lastField3 = 0;
 int actualdate = 0;
 int dateminustolerance = 0;
 int status = 0;
+final int DEBOUNCER = 1000;
 
-final String user     = "php";
-final String pass     = "php2000";
-final String database = "chess";
+final String USER     = "php";
+final String PASS     = "php2000";
+final String DATABASE = "chess";
 MySQL dbconnection;
 
 Serial myPort;    // The serial port
@@ -57,7 +58,7 @@ void draw()
   text("received: " + inString, 10,20);
   text("input: " + lastInput, 10,40);
   text("at: " + actualdate, 10, 60);
-  text("lt: " + dateminustolerance, 10, 60);
+  text("lt: " + dateminustolerance, 10, 80);
 }
 
 void serialEvent(Serial p)
@@ -85,7 +86,7 @@ void serialEvent(Serial p)
     { //if we've already established contact, keep getting and parsing data    
       Date dada = new Date();
       actualdate = (int)dada.getTime();
-      dateminustolerance = actualdate - 1000;
+      dateminustolerance = actualdate - DEBOUNCER;
       String readings = (inString);
       String[] list = split(readings, ',');
       println("field = "+list[0]+" ");
@@ -95,14 +96,15 @@ void serialEvent(Serial p)
       {
         if((int)me.getKey()<=(int)dateminustolerance)
         {
-          println("got" + me.getValue() + " at " + me.getKey() + " with tolerance " + (int)me.getKey()+ ":"+(int)dateminustolerance);
+          int zulu = (int)dateminustolerance-(int)me.getKey();
+          println("got" + me.getValue() + " at " + me.getKey() + " with tolerance " + zulu);
           lastInput.remove(me.getKey());
           println("r");
         }
       }
       
       // connect to database of server "localhost"  
-      dbconnection = new MySQL( this, "localhost", database, user, pass );
+      dbconnection = new MySQL( this, "localhost", DATABASE, USER, PASS );
   
       if ( dbconnection.connect() )
       {
@@ -118,8 +120,3 @@ void serialEvent(Serial p)
     }
   }        
 }
-
-//void keyPressed() 
-//{
-//  exit(); // Stops the program
-//}
