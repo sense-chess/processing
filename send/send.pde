@@ -26,6 +26,7 @@ int lastField0 = 0;
 int lastField1 = 0;
 int lastField2 = 0;
 int lastField3 = 0;
+int actualdate = 0;
 int dateminustolerance = 0;
 int status = 0;
 
@@ -55,29 +56,35 @@ void draw()
   background(0);
   text("received: " + inString, 10,20);
   text("input: " + lastInput, 10,40);
+  text("at: " + actualdate, 10, 60);
+  text("lt: " + dateminustolerance, 10, 60);
 }
 
 void serialEvent(Serial p)
 {
   inString = p.readString();        
-  if (inString != null) {
+  if (inString != null)
+  {
     //trim whitespace and formatting characters (like carriage return)
     inString = trim(inString);
     println(inString);
   
     //look for our "connecting" string to start the handshake
     //if it's there, clear the buffer, and send a request for data
-    if (firstContact == false) {
-      if (inString.equals("connecting")) {
+    if (firstContact == false)
+    {
+      if (inString.equals("connecting"))
+      {
         myPort.clear();
         firstContact = true;
         myPort.write("connected");
         println("connected to Arduino");
       }
     }
-    else { //if we've already established contact, keep getting and parsing data    
+    else 
+    { //if we've already established contact, keep getting and parsing data    
       Date dada = new Date();
-      int actualdate = (int)dada.getTime();
+      actualdate = (int)dada.getTime();
       dateminustolerance = actualdate - 1000;
       String readings = (inString);
       String[] list = split(readings, ',');
@@ -86,9 +93,10 @@ void serialEvent(Serial p)
       lastInput.put(actualdate, list[0]);
       for (Map.Entry me : lastInput.entrySet())
       {
-        if((int)me.getKey()<=dateminustolerance)
+        if((int)me.getKey()<=(int)dateminustolerance)
         {
-          //lastInput.remove(me.getKey());
+          println("got" + me.getValue() + " at " + me.getKey() + " with tolerance " + (int)me.getKey()+ ":"+(int)dateminustolerance);
+          lastInput.remove(me.getKey());
           println("r");
         }
       }
@@ -96,9 +104,12 @@ void serialEvent(Serial p)
       // connect to database of server "localhost"  
       dbconnection = new MySQL( this, "localhost", database, user, pass );
   
-      if ( dbconnection.connect() ) {
-        for (int i = 0; i < correctfields.length; i++) {
-          if(correctfields[i].equals(list[0])){
+      if ( dbconnection.connect() )
+      {
+        for (int i = 0; i < correctfields.length; i++)
+        {
+          if(correctfields[i].equals(list[0]))
+          {
             dbconnection.execute( "INSERT INTO boardinput (field, status) VALUES ('"+list[0]+"', '"+status+"');" ); 
           }
         }
@@ -108,6 +119,7 @@ void serialEvent(Serial p)
   }        
 }
 
-//void keyPressed() {
+//void keyPressed() 
+//{
 //  exit(); // Stops the program
 //}
