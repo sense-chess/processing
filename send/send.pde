@@ -28,7 +28,6 @@ int lastField2 = 0;
 int lastField3 = 0;
 int actualdate = 0;
 int dateminustolerance = 0;
-int status = 0;
 final int DEBOUNCER = 1000;
 
 final String USER     = "php";
@@ -112,7 +111,7 @@ void serialEvent(Serial p)
         {
           if(correctfields[i].equals(list[0]))
           {
-            dbconnection.execute( "INSERT INTO boardinput (field, status) VALUES ('"+list[0]+"', '"+status+"');" ); 
+            dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" ); 
           }
         }
         dbconnection.close();
