@@ -8,10 +8,12 @@
 import processing.serial.*;
 import java.util.*;
 import java.text.*;
+import java.util.Map.Entry;
 import de.bezier.data.sql.*;
 import java.util.Map;
 
 HashMap<Integer,String> lastInput = new HashMap<Integer,String>(200);
+HashMap<String,Integer> fieldFromArduino = new HashMap<String,Integer>(64);
 String fileName;
 boolean firstContact = false;
 String correctfields[] = { "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
@@ -22,13 +24,14 @@ String correctfields[] = { "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
                            "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
                            "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8",
                            "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8" }; 
-int lastField0 = 0;
-int lastField1 = 0;
-int lastField2 = 0;
-int lastField3 = 0;
+int lastField = 0;
 int actualdate = 0;
+int lastTimeSentDate = 0;
 int dateminustolerance = 0;
-final int DEBOUNCER = 1000;
+String sendThisField = "";
+final int FIELDSMININLASTINPUT = 50;
+final int FIELDMINFOUND = 10;
+final int DEBOUNCER = 100;
 
 final String USER     = "php";
 final String PASS     = "php2000";
@@ -90,31 +93,64 @@ void serialEvent(Serial p)
       String[] list = split(readings, ',');
       println("field = "+list[0]+" ");
       println();
-      lastInput.put(actualdate, list[0]);
+      Iterator<Entry<Integer,String>> iter = lastInput.entrySet().iterator();
+      while (iter.hasNext()) {
+        Entry<Integer,String> entry = iter.next();
+        int k = entry.getKey();    
+        iter.remove();
+      }
+      
+      
+      
       for (Map.Entry me : lastInput.entrySet())
       {
-        if((int)me.getKey()<=(int)dateminustolerance)
+        int zulu = (int)dateminustolerance-(int)me.getKey();
+        println("got " + me.getValue() + " at " + me.getKey() + " with tolerance " + zulu);
+        if(zulu >= DEBOUNCER)
         {
-          int zulu = (int)dateminustolerance-(int)me.getKey();
-          println("got" + me.getValue() + " at " + me.getKey() + " with tolerance " + zulu);
           lastInput.remove(me.getKey());
           println("r");
         }
       }
+      lastInput.put(actualdate, list[0]);
       
-      // connect to database of server "localhost"  
-      dbconnection = new MySQL( this, "localhost", DATABASE, USER, PASS );
-  
-      if ( dbconnection.connect() )
+      if(lastInput.size()>=FIELDSMININLASTINPUT)
       {
+        fieldFromArduino.clear();
         for (int i = 0; i < correctfields.length; i++)
         {
-          if(correctfields[i].equals(list[0]))
+          fieldFromArduino.put(correctfields[i],0);
+        }
+        for (Map.Entry meo : lastInput.entrySet())
+        {
+          for (Map.Entry meoo : fieldFromArduino.entrySet())
           {
-            dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+list[0]+"');" ); 
+            if((int)meoo.getKey()==(int)meo.getKey())
+            {
+              int nop = (int)meoo.getValue()+1;
+              fieldFromArduino.put((String)meoo.getKey(), nop);
+            }
           }
         }
-        dbconnection.close();
+        int lolli = 0;
+        for (Map.Entry meow : fieldFromArduino.entrySet())
+        {
+          if((int)meow.getValue()>lolli)
+          {
+            sendThisField = (String)meow.getKey();
+          }
+        }
+        if(lolli >= FIELDMINFOUND && actualdate-lastTimeSentDate>DEBOUNCER)
+        {
+          // connect to database of local server  
+          dbconnection = new MySQL( this, "localhost", DATABASE, USER, PASS );
+          if ( dbconnection.connect() )
+          {
+            dbconnection.execute( "INSERT INTO boardinput (field) VALUES ('"+sendThisField+"');" ); 
+            dbconnection.close();
+            lastTimeSentDate = actualdate;
+          }
+        }
       }
     }
   }        
