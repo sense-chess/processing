@@ -29,8 +29,8 @@ int actualdate = 0;
 int lastTimeSentDate = 0;
 int dateminustolerance = 0;
 String sendThisField = "";
-final int FIELDSMININLASTINPUT = 50;
-final int FIELDMINFOUND = 10;
+final int FIELDSMININLASTINPUT = 10;
+final int FIELDMINFOUND = 5;
 final int DEBOUNCER = 100;
 
 final String USER     = "php";
@@ -58,9 +58,9 @@ void draw()
 {
   background(0);
   text("received: " + inString, 10,20);
-  text("input: " + lastInput, 10,40);
-  text("at: " + actualdate, 10, 60);
-  text("lt: " + dateminustolerance, 10, 80);
+  //text("input: " + lastInput, 10,40);
+  //text("at: " + actualdate, 10, 60);
+  //text("lt: " + dateminustolerance, 10, 80);
 }
 
 void serialEvent(Serial p)
@@ -93,23 +93,14 @@ void serialEvent(Serial p)
       String[] list = split(readings, ',');
       println("field = "+list[0]+" ");
       println();
-      Iterator<Entry<Integer,String>> iter = lastInput.entrySet().iterator();
+      Iterator iter = lastInput.entrySet().iterator();
       while (iter.hasNext()) {
-        Entry<Integer,String> entry = iter.next();
-        int k = entry.getKey();    
-        iter.remove();
-      }
-      
-      
-      
-      for (Map.Entry me : lastInput.entrySet())
-      {
-        int zulu = (int)dateminustolerance-(int)me.getKey();
-        println("got " + me.getValue() + " at " + me.getKey() + " with tolerance " + zulu);
-        if(zulu >= DEBOUNCER)
+        Map.Entry pair = (Map.Entry)iter.next();  
+        println("got " + pair.getValue() + " at " + pair.getKey());
+        if((int)dateminustolerance-(int)pair.getKey()>= DEBOUNCER)
         {
-          lastInput.remove(me.getKey());
-          println("r");
+        iter.remove(); // avoids a ConcurrentModificationException
+        println("r");
         }
       }
       lastInput.put(actualdate, list[0]);
@@ -125,7 +116,7 @@ void serialEvent(Serial p)
         {
           for (Map.Entry meoo : fieldFromArduino.entrySet())
           {
-            if((int)meoo.getKey()==(int)meo.getKey())
+            if((String)meoo.getKey()==(String)meo.getValue())
             {
               int nop = (int)meoo.getValue()+1;
               fieldFromArduino.put((String)meoo.getKey(), nop);
