@@ -32,6 +32,7 @@ String sendThisField = "";
 final int FIELDSMININLASTINPUT = 10;
 final int FIELDMINFOUND = 5;
 final int DEBOUNCER = 100;
+final int DEBOUNCERSENTDATABASE = 1000;
 
 final String USER     = "php";
 final String PASS     = "php2000";
@@ -74,7 +75,7 @@ void serialEvent(Serial p)
   
     //look for our "connecting" string to start the handshake
     //if it's there, clear the buffer, and send a request for data
-    if (firstContact == false)
+    if (!firstContact)
     {
       if (inString.equals("connecting"))
       {
@@ -96,17 +97,16 @@ void serialEvent(Serial p)
       Iterator iter = lastInput.entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry pair = (Map.Entry)iter.next();  
-        println("got " + pair.getValue() + " at " + pair.getKey());
         if((int)dateminustolerance-(int)pair.getKey()>= DEBOUNCER)
         {
         iter.remove(); // avoids a ConcurrentModificationException
-        println("r");
         }
       }
       lastInput.put(actualdate, list[0]);
       
       if(lastInput.size()>=FIELDSMININLASTINPUT)
       {
+        println("hi");
         fieldFromArduino.clear();
         for (int i = 0; i < correctfields.length; i++)
         {
@@ -116,7 +116,7 @@ void serialEvent(Serial p)
         {
           for (Map.Entry meoo : fieldFromArduino.entrySet())
           {
-            if((String)meoo.getKey()==(String)meo.getValue())
+            if(meoo.getKey().equals((String)meo.getValue()))
             {
               int nop = (int)meoo.getValue()+1;
               fieldFromArduino.put((String)meoo.getKey(), nop);
@@ -129,9 +129,11 @@ void serialEvent(Serial p)
           if((int)meow.getValue()>lolli)
           {
             sendThisField = (String)meow.getKey();
+            println("sent: " + sendThisField);
+            lolli = (int)meow.getValue();
           }
         }
-        if(lolli >= FIELDMINFOUND && actualdate-lastTimeSentDate>DEBOUNCER)
+        if(lolli >= FIELDMINFOUND && actualdate-lastTimeSentDate>DEBOUNCERSENTDATABASE)
         {
           // connect to database of local server  
           dbconnection = new MySQL( this, "localhost", DATABASE, USER, PASS );
